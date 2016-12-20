@@ -2,9 +2,10 @@
   int boxSize = 25;
   color[][]colorField;
   boolean play = false;
+  int generation = 1;
 
 void setup(){
-  frameRate(10);
+  frameRate(5);
   size(500,500);
   
   //load font
@@ -97,6 +98,7 @@ void draw() {
       }
     }
     colorField = colorFieldTmp;
+    ++generation;
   }
   
   //update cell colors
@@ -109,24 +111,31 @@ void draw() {
      fill(0);
      textSize(200 / boxSize);
      text( str( i / boxSize ) + "," + str( j / boxSize ), i , j + ( boxSize / 2 ) ); */
-     
+          
     }
   } 
   
   //start and stop label
   textSize( 20 );
   noStroke();
+  fill(255);
+  rect( width - 70, height - 40, 65, 30);
   if(play){
-    fill(255);
-    rect( width - 70, height - 40, 65, 30);
     fill( #34C92B );
-    text( "Start", width - 65, height - 20 );
+    text( "Play", width - 62, height - 20 );
   }else{
-    fill(255);
-    rect( width - 70, height - 40, 60, 30);
     fill( #E33054 );
-    text( "Stop", width - 65, height - 20 );
+    text( "Stop", width - 62, height - 20 );
   }
+  stroke(1);
+  
+  //print generation
+  textSize( 20 );
+  noStroke();
+  fill(255);
+  rect( 10, height - 40, 250, 30);
+  fill(0);
+  text( "Generation: " + str(generation), 17, height - 20 );
   stroke(1);
   
   /*//help text
