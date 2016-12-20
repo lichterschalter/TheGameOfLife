@@ -1,27 +1,24 @@
   int fieldSize = 0;
-  int boxSize = 25;
+  int boxSize = 20; //working are: 10, 20, 25
   color[][]colorField;
   boolean play = false;
+  boolean initFlag = false;
+  boolean manual1Seen = true;
+  boolean manual2Seen = false;
   int generation = 1;
   int speed = 6;
   int maxSpeed = 100;
+  PFont mono, bold;
 
 void setup(){
   frameRate(60);
   size(500,500);
   
   //load font
-  PFont mono;
   mono = loadFont("CourierNewPS-BoldMT-48.vlw");
+  bold = loadFont("MicrosoftPhagsPa-Bold-48.vlw");
   textFont(mono);
   
-  //init 2d color array with all fields white
-  colorField = new color[ ( width / boxSize )][ ( height / boxSize ) ];
-  for( int i = 0; i < colorField.length; ++i){
-    for( int j = 0; j < colorField[i].length; ++j){
-      colorField[i][j] = color(255);
-    }
-  }
 }
 
 void keyPressed() {
@@ -30,10 +27,10 @@ void keyPressed() {
       if( play ) play = false;
       else play = true;
    }
-   if( speed < maxSpeed && k == 45 ){ //-
+   if( speed < maxSpeed && k == '-' ){ //-
       ++speed;
    }
-   if( speed > 1 && k == 43 ) { //+
+   if( speed > 1 && k == '+' ) { //+
       --speed;
    }
    if (k == CODED) {
@@ -43,28 +40,50 @@ void keyPressed() {
         drawGUI();
      }
    }
-   if( k == ' '){
-     //make all fields white
-     colorField = new color[ ( width / boxSize )][ ( height / boxSize ) ];
-     for( int i = 0; i < colorField.length; ++i){
-       for( int j = 0; j < colorField[i].length; ++j){
-         colorField[i][j] = color(255);
-       }
+   if( k == '?' || k == 'h' ){ //? and h
+     if( manual2Seen == false ){
+       manual2Seen = true;
+       loop();
+     }else{
+       manual2Seen = false;
+       drawManual2();
+       noLoop();
+     }
+   }
+   if( k == ' '){ //spacebar
+     drawEmptyGrid();
+     generation = 1;
+   }
+}
+
+void drawEmptyGrid() {
+   //make all fields white
+   colorField = new color[ ( width / boxSize )][ ( height / boxSize ) ];
+   for( int i = 0; i < colorField.length; ++i){
+     for( int j = 0; j < colorField[i].length; ++j){
+       colorField[i][j] = color(255);
      }
    }
 }
 
 void mousePressed() {
-   if( colorField[ mouseX / boxSize ][ mouseY / boxSize ] == color(255) ){
-     colorField[ mouseX / boxSize ][ mouseY / boxSize ] = color(0);
+   if( manual1Seen == true && manual2Seen == true ){
+     if( colorField[ mouseX / boxSize ][ mouseY / boxSize ] == color(255) ){
+       colorField[ mouseX / boxSize ][ mouseY / boxSize ] = color(0);
+     }else{
+       colorField[ mouseX / boxSize ][ mouseY / boxSize ] = color(255);
+     };
+     redraw();
    }else{
-     colorField[ mouseX / boxSize ][ mouseY / boxSize ] = color(255);
-   };
-   redraw();
+     if( manual1Seen == false ){
+       manual1Seen = true;
+     }else{
+       manual2Seen = true; 
+     }
+   }
 }
 
 void gameLogic(){
-      System.out.println( frameCount );
       color[][] colorFieldTmp = new color[ ( width / boxSize )][ ( height / boxSize ) ];
       int fieldChanges = 0;
       for( int i = 0; i < colorField.length; ++i){
@@ -191,25 +210,72 @@ void drawGUI(){
   fill(255);
   text( "Speed: " + str( maxSpeed - speed + 1 ), 277, height - 20 );
   stroke(1);
-  
-  /*//help text
-  textSize( 20 );
+
+}
+
+void drawManual1(){
   noStroke();
   fill(255);
-  rect( 10, height - 100, 400, 90);
-  fill( #304CE3 );
-  text( "Mouselick: put living cell onto grid", 15, height - 80 );
-  stroke(1);*/
+  rect( 0, 0, width, height);
+  textSize( 30 );
+  fill( #E33054 );
+  text( "Conways Game of Life", 20, 40 );
+  fill( 0 );
+  textSize(17);
+  text( "The 4 Rules:", 20, 120 ); 
+  text( "1. Any living cell with < 2 live", 20, 160 ); 
+  text( "   neighbours dies,", 20, 180 ); 
+  text( "   as if caused by underpopulation.", 20, 200 ); 
+  text( "2. Any living cell with 2 or 3 live", 20, 240 ); 
+  text( "   neighbours lives on to the next generation.", 20, 260 );
+  text( "3. Any living cell with > 3 live", 20, 300 ); 
+  text( "   neighbours dies, as if by overpopulation.", 20, 320 ); 
+  text( "4. Any dead cell with exactly 3 live", 20, 360 ); 
+  text( "   neighbours becomes a live cell,", 20, 380 );
+  text( "   as if by reproduction.", 20, 400 );
+  stroke(1);
+}
+
+void drawManual2(){
+  noStroke();
+  fill(255);
+  rect( 0, 0, width, height);
+  textSize( 30 );
+  fill( #E33054 );
+  text( "G A M E   O F   L I F E", 20, 40 );
+  fill( 0 );
+  text( "CLICK: set living cells", 20, 120 ); 
+  text( "ENTER: start / stop", 20, 160 ); 
+  text( "SPACE: clear grid", 20, 200 ); 
+  text( "--> : one step forward", 20, 240 ); 
+  text( "+ and - : set speed", 20, 280 ); 
+  text( "? and 'h' : help page", 20, 320 ); 
+  text( "This is a very simple", 20, 400 ); 
+  text( "simulation based on the", 20, 440 );
+  text( "four rules of Conway.", 20, 480 );
+  stroke(1);
 }
 
 void draw() {
-  if( play ){
+  if( manual1Seen == false ){
+    drawManual1();
+  }
+  else if( manual2Seen == false ){
+    drawManual2();
+  }
+  else if( initFlag == false ){
+    drawEmptyGrid();
+    initFlag = true;
+  }
+  else if( play ){
      if( frameCount % speed == 0 ) { 
        gameLogic();
      }
   }
-  updateCells();
-  drawGUI();
+  if( manual1Seen == true && manual2Seen == true && initFlag == true ){
+    updateCells();
+    drawGUI();
+  }
 }
 
 /*THE GAME OF LIFE RULES:
